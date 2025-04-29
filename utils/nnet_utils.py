@@ -118,6 +118,90 @@ def train_nnet(nnet: nn.Module, states_nnet: List[np.ndarray], outputs: np.ndarr
     return last_loss
 
 
+def train_ranking_nnet(nnet: nn.Module,
+                       states_nnet: List[np.ndarray],
+                       outputs: np.ndarray,
+                       device: torch.device,
+                       batch_size: int,
+                       num_itrs: int,
+                       train_itr: int,
+                       lr: float,
+                       lr_d: float,
+                       evaluator_net: nn.Module,
+                       display: bool = True
+                       ) -> float:
+    print("Now optimizing ranking nnet instead of cost-to-go neural net.")
+    # optimization
+    display_itrs = 100
+    criterion = nn.MSELoss()
+    optimizer: Optimizer = optim.Adam(nnet.parameters(), lr=lr)
+
+    # initialize status tracking
+    start_time = time.time()
+
+    # train network
+    batches: List[Tuple[List, np.ndarray]] = make_batches(states_nnet, outputs, batch_size)
+
+    nnet.train()
+    max_itrs: int = train_itr + num_itrs
+
+    last_loss: float = np.inf
+    batch_idx: int = 0
+    while train_itr < max_itrs:
+        # zero the parameter gradients
+        optimizer.zero_grad()
+        lr_itr: float = lr * (lr_d ** train_itr) # learning_rate decay.
+        for param_group in optimizer.param_groups:
+            param_group['lr'] = lr_itr
+
+        # get data
+        inputs_batch, targets_batch_np = batches[batch_idx]
+        targets_batch_np = targets_batch_np.astype(np.float32)
+
+        # send data to device
+        states_batch: List[Tensor] = states_nnet_to_pytorch_input(inputs_batch, device)
+        targets_batch: Tensor = torch.tensor(targets_batch_np, device=device)
+
+        # forward
+        nnet_outputs_batch: Tensor = nnet(*states_batch)
+
+        # cost
+        nnet_cost_to_go = nnet_outputs_batch[:, 0]
+        target_cost_to_go = targets_batch[:, 0]
+
+        # TODO Expand the criterion here.
+        # TODO How to do it? It looks like the network is not aware of the arguments at a given state.
+        # TODO Not a real problem, same way the network isn't aware of other nodes. Just need to make sure that
+        # TODO the node with the least cost to go is truelly the one with the lowest cost.
+        # TODO meaning I need the true labels...
+        loss = criterion(nnet_cost_to_go, target_cost_to_go)
+
+        # backwards
+        loss.backward()
+
+        # step
+        optimizer.step()
+
+        last_loss = loss.item()
+        # display progress
+        if (train_itr % display_itrs == 0) and display:
+            print("Itr: %i, lr: %.2E, loss: %.2E, targ_ctg: %.2f, nnet_ctg: %.2f, "
+                  "Time: %.2f" % (
+                      train_itr, lr_itr, loss.item(), target_cost_to_go.mean().item(), nnet_cost_to_go.mean().item(),
+                      time.time() - start_time))
+
+            start_time = time.time()
+
+        train_itr = train_itr + 1
+
+        batch_idx += 1
+        if batch_idx >= len(batches):
+            shuffle(batches)
+            batch_idx = 0
+
+    return last_loss
+
+
 # pytorch device
 def get_device() -> Tuple[torch.device, List[int], bool]:
     device: torch.device = torch.device("cpu")

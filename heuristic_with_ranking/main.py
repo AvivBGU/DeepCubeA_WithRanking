@@ -114,6 +114,12 @@ def load_pretrained_model(npuzzle_sqrt_dim: int = PRETRAINED_DIMS) -> Callable:
     return heuristic_fn
 
 def load_npuzzle(pickled_problem_path: str, heuristic_function: Callable) -> list[int]:
+    """
+    Loads path to puzzle and displays it in the gui.
+    :param pickled_problem_path:
+    :param heuristic_function:
+    :return:
+    """
     data = pickle.load(open(pickled_problem_path, "rb"))
     for single_puzzle in data['states']:
         single_puzzle: NPuzzle
@@ -136,9 +142,6 @@ def generate_examples(examples_to_generate: int = EXAMPLES_TO_GENERATE,
         back_max = MAX_NUMBERS_OF_BACKWARDS_MOVES_TO_GENERATE,
         filepath_queue = file_queue
     )
-
-
-
 
 
 if __name__ == '__main__':
