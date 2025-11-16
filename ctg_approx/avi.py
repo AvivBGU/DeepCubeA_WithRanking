@@ -206,7 +206,7 @@ def main():
         # update
         targ_file: str = "%s/model_state_dict.pt" % args_dict['targ_dir']
         all_zeros: bool = not os.path.isfile(targ_file)
-        heur_fn_i_q, heur_fn_o_qs, heur_procs = nnet_utils.start_heur_fn_runners(args_dict['num_update_procs'],
+        heur_fn_i_q, heur_fn_o_qs, heur_procs = nnet_utils.start_heur_fn_runners(args_dict['num_update_procs'], # Spawns processes that run heuristics.
                                                                                  args_dict['targ_dir'],
                                                                                  device, on_gpu, env,
                                                                                  all_zeros=all_zeros,

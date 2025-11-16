@@ -56,7 +56,7 @@ class PuzzleGUI:
 
     def cost_to_goal(self, state: np.ndarray, heuristic_function: Callable) -> int:
         puzzle_as_state: NPuzzleState = NPuzzleState(state)
-        return heuristic_function([puzzle_as_state])[-1]
+        return heuristic_function([puzzle_as_state])[-1] # Returns more than 1 results depending on the number of states.
 
     def update_status(self, msg=None):
         cost = self.cost_to_goal(self.state, self.heuristic_function)
