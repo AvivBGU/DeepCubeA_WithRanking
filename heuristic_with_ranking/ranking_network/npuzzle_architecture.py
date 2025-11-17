@@ -3,7 +3,6 @@ import torch.nn as nn
 class RankingNetworkNPuzzle(nn.Module):
 
     # Input should be the board state. The best move should receive the highest number.
-
     def __init__(self,
                  first_layer: tuple[int, int], # In/out dims
                  other_layers: tuple[int], # / Out dims
