@@ -17,7 +17,7 @@ from environments.environment_abstract import Environment
 from environments.n_puzzle import NPuzzle, NPuzzleState
 from heuristic_with_ranking.main import PRETRAINED_DIMS, load_pretrained_model
 
-MAX_BACKWARD_STEPS: int = 10
+MAX_BACKWARD_STEPS: int = 15
 STEPS_TO_GENERATE_AT_A_TIME: int = 1
 
 def load_evaluator(environment: Environment) -> Callable:
@@ -48,10 +48,6 @@ def export_generated_examples(generated_examples: list[tuple[np.ndarray, float]]
         pickle.dump(generated_examples, f)
 
 
-
-
-
-
 if __name__ == '__main__':
     npuzzle_env: Environment = NPuzzle(PRETRAINED_DIMS)
     evaluator: Callable = load_evaluator(npuzzle_env)
@@ -62,4 +58,4 @@ if __name__ == '__main__':
         generator,
         evaluator
     )
-    export_generated_examples(generated_training_set, "training_examples")
+    export_generated_examples(generated_training_set, "validation_examples")

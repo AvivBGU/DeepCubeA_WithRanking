@@ -3,3 +3,4 @@
 jobs/
 submit.sh
 dummy/
+**/**.pkl
