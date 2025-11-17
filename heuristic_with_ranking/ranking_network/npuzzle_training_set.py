@@ -31,7 +31,7 @@ def generate_training_set(numbers_of_example_to_generate: int,
         states, _ = generator()
         puzzle_state: NPuzzleState = states[0]
         example_evaluation = evaluator([puzzle_state])[-1]
-        generated_examples.append((puzzle_state.tiles, example_evaluation))
+        generated_examples.append((puzzle_state.tiles.astype(np.float32), example_evaluation.astype(np.float32)))
     return generated_examples
 
 

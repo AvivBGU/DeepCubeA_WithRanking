@@ -3,7 +3,7 @@ import time
 
 import torch
 from torch import nn
-from torch import data
+from torch.utils import data
 
 LEARNING_RATE: float = 1e-3
 WEIGHT_DECAY: float = 1e-4
@@ -13,7 +13,8 @@ PATIENCE_EXPECTED: float = 1e-3
 
 def train_npuzzle_model(model_to_train: nn.Module,
                         training_set: data.DataLoader,
-                        validation_set: data.DataLoader):
+                        validation_set: data.DataLoader,
+                        device_to_use: torch.device):
     optimizer = torch.optim.Adam(
                                  model_to_train.parameters(),
                                  lr=LEARNING_RATE,
@@ -34,7 +35,10 @@ def train_npuzzle_model(model_to_train: nn.Module,
         start = time.time()
         for batch, targets in training_set:
             optimizer.zero_grad()
-            train_loss = criterion(model_to_train(batch), targets)
+            batch_in_device = batch.to(device_to_use)
+            targets_device = targets.to(device_to_use)
+            model_output = model_to_train(batch_in_device)
+            train_loss = criterion(model_output, targets_device)
             running_train_loss += train_loss.item()
             train_loss.backward()
             optimizer.step()
@@ -60,7 +64,7 @@ def train_npuzzle_model(model_to_train: nn.Module,
         print(f'Epoch {epoch + 1}/{MAX_EPOCHS} completed in {elapsed_time:.2f}. Avg training loss: {avg_train_loss} Avg validation loss: {avg_validation_loss}')
         current_epoch += 1
         if performance_degraded:
-            print(f'Performance degraded. Patience factor: {patience_for_improvement}/{PATIENCE_EXPECTED}')
+            print(f'Performance degraded. Patience factor: {patience_for_improvement}/{PATIENCE}')
         if patience_for_improvement >= PATIENCE:
             print('Performance degraded. Patience factor reached. Stopping training.')
             break

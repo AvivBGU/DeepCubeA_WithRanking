@@ -1,8 +1,10 @@
 import pickle
 
 import torch
-from torch import nn, device
+from torch import device
 from torch.utils import data
+from torchsummary import summary
+
 
 from heuristic_with_ranking.ranking_network.npuzzle_architecture import RankingNetworkNPuzzle
 from heuristic_with_ranking.ranking_network.npuzzle_training import train_npuzzle_model
@@ -29,6 +31,7 @@ def main():
         other_layers = [512, 256, 128, 64, 32, 16]
     )
     model = model.to(device_to_use)
+    summary(model, input_size=(16, ), batch_size=128)
     training_loader, validation_loader = load_training_set(
         training_set_location=TRAINING_SET_LOCATION,
         validation_set_location=VALIDATION_SET_LOCATION,
@@ -36,7 +39,8 @@ def main():
     returned_model, training_loss, validation_loss = train_npuzzle_model(
         training_set=training_loader,
         validation_set=validation_loader,
-        model_to_train=model
+        model_to_train=model,
+        device_to_use=device_to_use
     )
 
 
