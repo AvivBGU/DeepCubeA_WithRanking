@@ -1,4 +1,5 @@
 import tkinter as tk
+from typing import Callable
 
 import numpy as np
 
@@ -23,7 +24,7 @@ def cost_to_goal(state: np.ndarray) -> int:
     return heuristic_fn([puzzle_as_state])[-1]
 
 class PuzzleGUI:
-    def __init__(self, root, initial_state: np.ndarray):
+    def __init__(self, root, initial_state: np.ndarray, cost_to_goal_func: Callable):
         self.root = root
         self.state = initial_state.copy()
         self.buttons = [[None]*4 for _ in range(4)]
@@ -35,7 +36,7 @@ class PuzzleGUI:
         self.entry.grid(row=5, column=0, columnspan=3, pady=10, padx=5)
         self.load_button = tk.Button(root, text="Load State", font=("Courier", 12), command=self.load_state)
         self.load_button.grid(row=5, column=3, padx=5)
-
+        self.cost_to_goal_func = cost_to_goal_func
         self.draw_board()
 
     def draw_board(self):
@@ -54,8 +55,10 @@ class PuzzleGUI:
         self.update_status()
 
     def update_status(self, msg=None):
-        cost = cost_to_goal(self.state)
+        print("calling cost_to_goal_func")
+        cost = self.cost_to_goal_func(self.state)
         self.status['text'] = msg or f"Estimated Cost to Goal: {cost}"
+        print("finished cost_to_goal_func")
 
     def move_tile(self, x, y):
         zero_idx = np.where(self.state == 0)[0][0]
@@ -86,5 +89,5 @@ if __name__ == "__main__":
         13, 14, 15, 12
     ])
 
-    app = PuzzleGUI(root, start)
+    app = PuzzleGUI(root, start, cost_to_goal)
     root.mainloop()

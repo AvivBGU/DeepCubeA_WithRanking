@@ -68,14 +68,14 @@ def train_npuzzle_model(model_to_train: nn.Module,
             best_model_state_dict = copy.deepcopy(model_to_train.state_dict())
             performance_degraded = False
         elapsed_time = time.time() - start
-        print(f'Epoch {epoch + 1}/{MAX_EPOCHS} completed in {elapsed_time:.2f}. Avg training loss: {avg_train_loss} Avg validation loss: {avg_validation_loss}')
+        print(f'Epoch {epoch + 1}/{MAX_EPOCHS} completed in {elapsed_time:.2f} seconds. Avg training loss: {avg_train_loss} Avg validation loss: {avg_validation_loss}')
         current_epoch += 1
         if performance_degraded:
             print(f'No significant improvement. Patience factor: {patience_for_improvement}/{PATIENCE}')
         if patience_for_improvement >= PATIENCE:
             print('No significant improvement. Patience factor reached. Stopping training.')
             break
-    print(f'Finished in {time.time() - time_for_all_training:.2f} seconds, {current_epoch} epochs')
+    print(f'Finished training in {time.time() - time_for_all_training:.2f} seconds, {current_epoch} epochs')
     model_to_train.load_state_dict(best_model_state_dict)
     model_to_train.eval()
     return model_to_train, train_loss_per_epoch, validation_loss_per_epoch,
