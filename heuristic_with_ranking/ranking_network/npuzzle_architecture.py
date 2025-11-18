@@ -1,3 +1,5 @@
+import numpy as np
+import torch
 import torch.nn as nn
 
 class RankingNetworkNPuzzle(nn.Module):
@@ -28,5 +30,12 @@ class RankingNetworkNPuzzle(nn.Module):
 
 
     def forward(self, x):
-        return self.network(x)
+        if not isinstance(x, torch.Tensor):
+            if isinstance(x, list):
+                # Convert list of arrays to a single ndarray first
+                x = np.asarray(x, dtype=np.float32)
 
+            x = torch.as_tensor(x, dtype=torch.float32, device=next(self.parameters()).device)
+        else:
+            x = x.float().to(next(self.parameters()).device)
+        return self.network(x)
